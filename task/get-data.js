@@ -47,7 +47,7 @@ let calculateLine = async (info) => {
 }
 async function getData () {
   console.log('begin spider')
-  puppeteer.launch({ headless: true }).then(async browser => {
+  puppeteer.launch({ headless: false }).then(async browser => {
     try {
       const page = await browser.newPage()
       await page.setCookie({

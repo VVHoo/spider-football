@@ -47,23 +47,23 @@ let calculateLine = async (info) => {
 }
 async function getData () {
   console.log('begin spider')
-  const browser = await puppeteer.launch({ headless: true })
+  const browser = await puppeteer.launch({ headless: false })
   try {
-    // const page = await browser.newPage()
-    // await page.setCookie({
-    //   "domain": "m.win007.com",
-    //   "expirationDate": '1574130600',
-    //   "name": "filterType",
-    //   "path": "/",
-    //   "sameSite": "unspecified",
-    //   "storeId": "0",
-    //   "value": "0!5!123",
-    //   "id": '3'
-    // })
-    // await page.goto(url, {
-    //   waitUntil: 'networkidle0'
-    // });
-    // await page.waitForSelector('.MList .match')
+    const page = await browser.newPage()
+    await page.setCookie({
+      "domain": "m.win007.com",
+      "expirationDate": '1574130600',
+      "name": "filterType",
+      "path": "/",
+      "sameSite": "unspecified",
+      "storeId": "0",
+      "value": "0!5!123",
+      "id": '3'
+    })
+    await page.goto(url, {
+      waitUntil: 'networkidle0'
+    });
+    await page.waitForSelector('.MList .match')
     // const lists = await page.evaluate(() => {
     //   let itemList = document.querySelectorAll('.MList .match')
     //   let hrefArr = []
@@ -76,7 +76,7 @@ async function getData () {
     //   }
     //   return hrefArr
     // })
-    // page.close()
+    page.close()
     const lists = [{id:1720825, href: 'http://m.win007.com/Analy/ShiJian/1720825.htm'}, {id: 1720823 ,href: 'http://m.win007.com/Analy/ShiJian/1720823.htm'}]
     for (let i = 0; i < lists.length; i++) {
       let page = await browser.newPage()

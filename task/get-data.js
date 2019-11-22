@@ -47,7 +47,7 @@ let calculateLine = async (info) => {
 }
 async function getData () {
   console.log('begin spider')
-  puppeteer.launch({ headless: false }).then(async browser => {
+  puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] }).then(async browser => {
     try {
       const page = await browser.newPage()
       await page.setCookie({

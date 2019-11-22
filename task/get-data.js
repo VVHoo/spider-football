@@ -47,50 +47,51 @@ let calculateLine = async (info) => {
 }
 async function getData () {
   console.log('begin spider')
-  const browser = await puppeteer.launch({ headless: false })
-  try {
-    const page = await browser.newPage()
-    await page.setCookie({
-      "domain": "m.win007.com",
-      "expirationDate": '1574130600',
-      "name": "filterType",
-      "path": "/",
-      "sameSite": "unspecified",
-      "storeId": "0",
-      "value": "0!5!123",
-      "id": '3'
-    })
-    await page.goto(url, {
-      waitUntil: 'networkidle0'
-    });
-    await page.waitForSelector('.MList .match')
-    // const lists = await page.evaluate(() => {
-    //   let itemList = document.querySelectorAll('.MList .match')
-    //   let hrefArr = []
-    //   for (let i = 0; i < itemList.length; i++) {
-    //     let id = itemList[i].id.split('_')[1]
-    //     hrefArr.push({
-    //       id: id,
-    //       href: `http://m.win007.com/Analy/ShiJian/${id}.htm`
-    //     })
-    //   }
-    //   return hrefArr
-    // })
-    page.close()
-    const lists = [{id:1720825, href: 'http://m.win007.com/Analy/ShiJian/1720825.htm'}, {id: 1720823 ,href: 'http://m.win007.com/Analy/ShiJian/1720823.htm'}]
-    for (let i = 0; i < lists.length; i++) {
-      let page = await browser.newPage()
-      await page.goto(lists[i].href, {
-        waitUntil: 'networkidle0'
+  puppeteer.launch({ headless: true }).then(async browser => {
+    try {
+      const page = await browser.newPage()
+      await page.setCookie({
+        "domain": "m.win007.com",
+        "expirationDate": '1574130600',
+        "name": "filterType",
+        "path": "/",
+        "sameSite": "unspecified",
+        "storeId": "0",
+        "value": "0!5!123",
+        "id": '3'
       })
-      const oddData = await page.$('#ouOdds')
-      oddData ? await detailSpider(page) : await page.close()
+      await page.goto(url, {
+        waitUntil: 'networkidle0'
+      });
+      await page.waitForSelector('.MList .match')
+      // const lists = await page.evaluate(() => {
+      //   let itemList = document.querySelectorAll('.MList .match')
+      //   let hrefArr = []
+      //   for (let i = 0; i < itemList.length; i++) {
+      //     let id = itemList[i].id.split('_')[1]
+      //     hrefArr.push({
+      //       id: id,
+      //       href: `http://m.win007.com/Analy/ShiJian/${id}.htm`
+      //     })
+      //   }
+      //   return hrefArr
+      // })
+      page.close()
+      const lists = [{id:1720825, href: 'http://m.win007.com/Analy/ShiJian/1720825.htm'}, {id: 1720823 ,href: 'http://m.win007.com/Analy/ShiJian/1720823.htm'}]
+      for (let i = 0; i < lists.length; i++) {
+        let page = await browser.newPage()
+        await page.goto(lists[i].href, {
+          waitUntil: 'networkidle0'
+        })
+        const oddData = await page.$('#ouOdds')
+        oddData ? await detailSpider(page) : await page.close()
+      }
+      await browser.close()
+    } catch (e) {
+      console.log(e)
+      await browser.close()
     }
-    await browser.close()
-  } catch (e) {
-    console.log(e)
-    await browser.close()
-  }
+  })
 }
 
 module.exports = getData

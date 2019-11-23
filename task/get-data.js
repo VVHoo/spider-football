@@ -46,7 +46,7 @@ let calculateLine = async (info) => {
   }
 }
 async function getData () {
-  puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] }).then(async browser => {
+  puppeteer.launch({ args: ['--disable-gpu', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] }).then(async browser => {
     try {
       const getCookiePage = await browser.newPage()
       await getCookiePage.goto(url, {

@@ -41,7 +41,6 @@ let calculateLine = async (info) => {
   let totalScore = parseInt(score.split('-')[0]) + parseInt(info.score.split('-')[1])
   let line = daContent.split('/').length === 2 ? 1.5 : 2
   let midTime = dayjs(beginTime).add('60', 'minute').unix()
-  console.log(daContent, homeName, guestName)
   if (parseFloat(daContent.split('/')[0]) - totalScore >= line && midTime >= dayjs().unix()) {
     sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent })
   }

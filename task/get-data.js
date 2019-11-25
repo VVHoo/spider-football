@@ -9,8 +9,8 @@ let detailSpider = async (page) => {
     const target = await page.evaluate(() => {
       let nodes = document.querySelectorAll('#OuTb td')
       let beginTime = document.querySelectorAll('.league')[0].innerHTML
-      let homeName = document.querySelectorAll('#homeName > span')[0].innerText
-      let guestName = document.querySelectorAll('#guestName .name')[0].innerText
+      let homeName = document.querySelectorAll('#homeName > marquee').length ? document.querySelectorAll('#homeName > marquee').innerText : document.querySelectorAll('#homeName > span')[0].innerText
+      let guestName = document.querySelectorAll('#guestName > marquee').length ? document.querySelectorAll('#guestName > marquee').innerText : document.querySelectorAll('#guestName .name')[0].innerText
       const timeText = `${new Date().getFullYear()}-${beginTime.replace(/&nbsp;/ig, ',').split(',')[1]}`;
       let info = {}
       for (let i in nodes) {
@@ -41,6 +41,7 @@ let calculateLine = async (info) => {
   let totalScore = parseInt(score.split('-')[0]) + parseInt(info.score.split('-')[1])
   let line = daContent.split('/').length === 2 ? 1.5 : 2
   let midTime = dayjs(beginTime).add('60', 'minute').unix()
+  console.log(daContent, homeName, guestName)
   if (parseFloat(daContent.split('/')[0]) - totalScore >= line && midTime >= dayjs().unix()) {
     sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent })
   }

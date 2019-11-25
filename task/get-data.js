@@ -32,7 +32,7 @@ let detailSpider = async (page) => {
     await page.close()
     await page.waitFor(500)
   } else {
-    page.close()
+    await page.close()
   }
 }
 
@@ -86,7 +86,7 @@ async function getData () {
         }
         return hrefArr
       })
-      page.close()
+      await page.close()
       for (let i = 0; i < lists.length; i++) {
         let page = await browser.newPage()
         await page.goto(lists[i].href, {

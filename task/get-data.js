@@ -1,10 +1,14 @@
 const dayjs = require('dayjs')
-const sendEmail = require('../utils/sendEmail')
+// const sendEmail = require('../utils/sendEmail')
+const saveData = require('../utils/saveDataToFile')
+const readData = require('../utils/readFileData')
+const fs = require('fs')
 const puppeteer = require('puppeteer');
 const url = 'http://m.win007.com/';
+let matchedData = {}
 
 // 抓取数据
-let detailSpider = async (page) => {
+let detailSpider = async (page, id) => {
   if (await page.$('#OuTb')) {
     const target = await page.evaluate(() => {
       let nodes = document.querySelectorAll('#OuTb td')
@@ -27,7 +31,7 @@ let detailSpider = async (page) => {
       return info
     })
     if (target.score) {
-      await calculateLine(target)
+      calculateLine(target, id)
     }
     await page.close()
     await page.waitFor(500)
@@ -36,13 +40,37 @@ let detailSpider = async (page) => {
   }
 }
 
-let calculateLine = async (info) => {
+let calculateLine = (info, id) => {
   let { score, daContent, beginTime, homeName, guestName } = info
   let totalScore = parseInt(score.split('-')[0]) + parseInt(info.score.split('-')[1])
   let line = daContent.split('/').length === 2 ? 1.5 : 2
   let midTime = dayjs(beginTime).add('60', 'minute').unix()
   if (parseFloat(daContent.split('/')[0]) - totalScore >= line && midTime >= dayjs().unix()) {
-    sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent })
+    matchedData[id] = { homeName: homeName, guestName: guestName, score: score, daContent: daContent }
+    // sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent })
+  }
+}
+
+let filterSaveData = (datas) => {
+  let fileName = `${dayjs().year()}-${dayjs().month() + 1}-${dayjs().date()}.json`
+  if (fs.existsSync(`/data/${fileName}.json`)) {
+    // 对象属性访问最快
+    readData(fileName, (games) => {
+      let filterData = games
+      for (let key in datas) {
+        if (games[key]) {
+          if (datas[key]['score'] !== filterData[key]['score']) {
+            filterData[key]['score'] = datas[key]['score']
+          }
+          if (datas[key]['daContent'] !== filterData[key]['daContent']) {
+            filterData[key]['daContent'] = datas[key]['daContent']
+          }
+        }
+      }
+      saveData(fileName, filterData)
+    })
+  } else {
+    saveData(fileName, datas)
   }
 }
 async function getData () {
@@ -89,11 +117,16 @@ async function getData () {
       await page.close()
       for (let i = 0; i < lists.length; i++) {
         let page = await browser.newPage()
+        let id = lists[i].id
         await page.goto(lists[i].href, {
           waitUntil: 'networkidle0'
         })
         const oddData = await page.$('#ouOdds')
-        oddData ? await detailSpider(page) : await page.close()
+        oddData ? await detailSpider(page, id) : await page.close()
+      }
+      // 保存符合条件的数据
+      if (Object.keys(matchedData).length) {
+        filterSaveData(matchedData)
       }
       await browser.close()
     } catch (e) {

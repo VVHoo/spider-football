@@ -1,11 +1,11 @@
 const dayjs = require('dayjs')
-// const sendEmail = require('../utils/sendEmail')
+const sendEmail = require('../utils/sendEmail')
 const saveData = require('../utils/saveDataToFile')
 const readData = require('../utils/readFileData')
 const fs = require('fs')
 const puppeteer = require('puppeteer');
 const url = 'http://m.win007.com/';
-let matchedData = {}
+// let matchedData = {}
 
 // 抓取数据
 let detailSpider = async (page, id) => {
@@ -46,8 +46,8 @@ let calculateLine = (info, id) => {
   let line = daContent.split('/').length === 2 ? 1.5 : 2
   let midTime = dayjs(beginTime).add('60', 'minute').unix()
   if (parseFloat(daContent.split('/')[0]) - totalScore >= line && midTime >= dayjs().unix()) {
-    matchedData[id] = { homeName: homeName, guestName: guestName, score: score, daContent: daContent }
-    // sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent })
+    // matchedData[id] = { homeName: homeName, guestName: guestName, score: score, daContent: daContent }
+    sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent })
   }
 }
 
@@ -125,9 +125,9 @@ async function getData () {
         oddData ? await detailSpider(page, id) : await page.close()
       }
       // 保存符合条件的数据
-      if (Object.keys(matchedData).length) {
-        filterSaveData(matchedData)
-      }
+      // if (Object.keys(matchedData).length) {
+      //   filterSaveData(matchedData)
+      // }
       await browser.close()
     } catch (e) {
       console.log(e)

@@ -131,6 +131,9 @@ async function getData () {
       await browser.close()
     } catch (e) {
       console.log(e)
+    } finally {
+      // 最后要退出进程
+      process.exit(0)
     }
   })
 }

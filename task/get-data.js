@@ -15,7 +15,8 @@ let detailSpider = async (page, id) => {
       let beginTime = document.querySelectorAll('.league')[0].innerHTML
       let homeName = document.querySelectorAll('#homeName > marquee').length ? document.querySelectorAll('#homeName > marquee').innerText : document.querySelectorAll('#homeName > span')[0].innerText
       let guestName = document.querySelectorAll('#guestName > marquee').length ? document.querySelectorAll('#guestName > marquee').innerText : document.querySelectorAll('#guestName .name')[0].innerText
-      const timeText = `${new Date().getFullYear()}-${beginTime.replace(/&nbsp;/ig, ',').split(',')[1]}`;
+      let analysisNodes = document.querySelectorAll('.huibg')
+      const timeText = `${new Date().getFullYear()}-${beginTime.replace(/&nbsp;/ig, ',').split(',')[1]}`
       let info = {}
       for (let i in nodes) {
         if (nodes[i].innerHTML === '中') {
@@ -26,6 +27,14 @@ let detailSpider = async (page, id) => {
             homeName: homeName,
             guestName: guestName
           }
+        }
+      }
+      for (let key in analysisNodes) {
+        if (analysisNodes[key].innerText === '射门') {
+          info.shot = `${analysisNodes[key].previousSibling.previousSibling.textContent}-射门-${analysisNodes[key].nextSibling.nextSibling.textContent}`
+        }
+        if (analysisNodes[key].innerText === '射正') {
+          info.shotPositive = `${analysisNodes[key].previousSibling.previousSibling.textContent}-射正-${analysisNodes[key].nextSibling.nextSibling.textContent}`
         }
       }
       return info
@@ -41,13 +50,14 @@ let detailSpider = async (page, id) => {
 }
 
 let calculateLine = (info, id) => {
-  let { score, daContent, beginTime, homeName, guestName } = info
+  let { score, daContent, beginTime, homeName, guestName, shot, shotPositive } = info
+  console.log(info)
   let totalScore = parseInt(score.split('-')[0]) + parseInt(info.score.split('-')[1])
   let line = daContent.split('/').length === 2 ? 1.5 : 2
   let midTime = dayjs(beginTime).add('60', 'minute').unix()
   if (parseFloat(daContent.split('/')[0]) - totalScore >= line && midTime >= dayjs().unix()) {
     // matchedData[id] = { homeName: homeName, guestName: guestName, score: score, daContent: daContent }
-    sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent })
+    sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent, shot: shot, shotPositive: shotPositive })
   }
 }
 

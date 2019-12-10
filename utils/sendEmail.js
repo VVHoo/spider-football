@@ -32,7 +32,7 @@ async function sendEmail (data) {
       // 收件人
       to: user,
       // 邮件内容，text或者html格式
-      text: `${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}`
+      text: `${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}, 射门: ${data.shot}, 射正: ${data.shotPositive}`
     }
     let res = await transporter.sendMail(mail)
   })

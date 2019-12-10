@@ -1,3 +1,3 @@
 module.exports = {
-  TRIGGER_TIME: '*/10 * * * *'
+  TRIGGER_TIME: '*/1 * * * *'
 }

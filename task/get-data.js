@@ -51,7 +51,6 @@ let detailSpider = async (page, id) => {
 
 let calculateLine = (info, id) => {
   let { score, daContent, beginTime, homeName, guestName, shot, shotPositive } = info
-  console.log(info)
   let totalScore = parseInt(score.split('-')[0]) + parseInt(info.score.split('-')[1])
   let line = daContent.split('/').length === 2 ? 1.5 : 2
   let midTime = dayjs(beginTime).add('60', 'minute').unix()

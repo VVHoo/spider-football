@@ -23,19 +23,18 @@ const emailConfig = {
 const transporter = nodemailer.createTransport(emailConfig)
 
 async function sendEmail (data) {
-  await receivers.map(async user => {
-    let mail = {
-      // 发件人
-      from: '来自cloud <327107942@qq.com>',
-      // 主题
-      subject: 'info',
-      // 收件人
-      to: user,
-      // 邮件内容，text或者html格式
-      text: `${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}, 射门: ${data.shot}, 射正: ${data.shotPositive}`
-    }
-    let res = await transporter.sendMail(mail)
-  })
+  let content = data.shot ? `${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}, 射门: ${data.shot}, 射正: ${data.shotPositive}` : `${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}`
+  let mail = {
+    // 发件人
+    from: '来自cloud <327107942@qq.com>',
+    // 主题
+    subject: 'info',
+    // 收件人
+    to: receivers.join(','),
+    // 邮件内容，text或者html格式
+    text: content
+  }
+  let res = await transporter.sendMail(mail)
 }
 
 module.exports = sendEmail

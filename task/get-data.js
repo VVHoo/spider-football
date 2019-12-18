@@ -5,7 +5,7 @@ const readData = require('../utils/readFileData')
 const fs = require('fs')
 const puppeteer = require('puppeteer');
 const url = 'http://m.win007.com/';
-// let matchedData = {}
+let matchedData = {}
 
 // 抓取数据
 let detailSpider = async (page, id) => {
@@ -55,8 +55,9 @@ let calculateLine = (info, id) => {
   let line = daContent.split('/').length === 2 ? 1.5 : 2
   let midTime = dayjs(beginTime).add('60', 'minute').unix()
   if (parseFloat(daContent.split('/')[0]) - totalScore >= line && midTime >= dayjs().unix()) {
-    // matchedData[id] = { homeName: homeName, guestName: guestName, score: score, daContent: daContent }
-    sendEmail({ homeName: homeName, guestName: guestName, score: score, daContent: daContent, shot: shot, shotPositive: shotPositive })
+    let saveData = shot ? { homeName: homeName, guestName: guestName, score: score, daContent: daContent, shot: shot, shotPositive: shotPositive } : { homeName: homeName, guestName: guestName, score: score, daContent: daContent }
+    matchedData[id] = saveData
+    sendEmail(saveData)
   }
 }
 
@@ -73,6 +74,12 @@ let filterSaveData = (datas) => {
           }
           if (datas[key]['daContent'] !== filterData[key]['daContent']) {
             filterData[key]['daContent'] = datas[key]['daContent']
+          }
+          if (datas[key]['shot'] !== filterData[key]['shot']) {
+            filterData[key]['shot'] = datas[key]['shot']
+          }
+          if (datas[key]['shotPositive'] !== filterData[key]['shotPositive']) {
+            filterData[key]['shotPositive'] = datas[key]['shotPositive']
           }
         }
       }
@@ -134,9 +141,9 @@ async function getData () {
         oddData ? await detailSpider(page, id) : await page.close()
       }
       // 保存符合条件的数据
-      // if (Object.keys(matchedData).length) {
-      //   filterSaveData(matchedData)
-      // }
+      if (Object.keys(matchedData).length) {
+        filterSaveData(matchedData)
+      }
       await browser.close()
     } catch (e) {
       console.log(e)

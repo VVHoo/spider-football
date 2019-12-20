@@ -10,7 +10,7 @@
 // 发送邮件逻辑
 const nodemailer = require('nodemailer')
 // 创建一个SMTP客户端配置
-const receivers = ['770822273@qq.com', 'zsxinwenhui@163.com', '396857323@qq.com', '827583114@qq.com']
+const receivers = ['136200456@qq.com']
 const emailConfig = {
   host: 'smtp.qq.com',
   port: 465,
@@ -23,7 +23,7 @@ const emailConfig = {
 const transporter = nodemailer.createTransport(emailConfig)
 
 async function sendEmail (data) {
-  let content = data.shot ? `${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}, 射门: ${data.shot}, 射正: ${data.shotPositive}` : `${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}`
+  let content = data.shot ? `id: ${data.id}, ${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}, 射门: ${data.shot}, 射正: ${data.shotPositive}` : `id: ${data.id},  ${data.homeName} VS ${data.guestName}, score: ${data.score}, daContent: ${data.daContent}`
   let mail = {
     // 发件人
     from: '来自cloud <327107942@qq.com>',

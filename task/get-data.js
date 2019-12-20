@@ -40,7 +40,7 @@ let detailSpider = async (page, id) => {
       return info
     })
     if (target.score) {
-      calculateLine(target, id)
+      await calculateLine(target, id)
     }
     await page.close()
     await page.waitFor(500)
@@ -49,15 +49,15 @@ let detailSpider = async (page, id) => {
   }
 }
 
-let calculateLine = (info, id) => {
+let calculateLine = async (info, id) => {
   let { score, daContent, beginTime, homeName, guestName, shot, shotPositive } = info
   let totalScore = parseInt(score.split('-')[0]) + parseInt(info.score.split('-')[1])
   let line = daContent.split('/').length === 2 ? 1.5 : 2
   let midTime = dayjs(beginTime).add('60', 'minute').unix()
   if (parseFloat(daContent.split('/')[0]) - totalScore >= line && midTime >= dayjs().unix()) {
-    let saveData = shot ? { homeName: homeName, guestName: guestName, score: score, daContent: daContent, shot: shot, shotPositive: shotPositive } : { homeName: homeName, guestName: guestName, score: score, daContent: daContent }
+    let saveData = shot ? { id: id, homeName: homeName, guestName: guestName, score: score, daContent: daContent, shot: shot, shotPositive: shotPositive } : { id: id, homeName: homeName, guestName: guestName, score: score, daContent: daContent }
     matchedData[id] = saveData
-    sendEmail(saveData)
+    await sendEmail(saveData)
   }
 }
 

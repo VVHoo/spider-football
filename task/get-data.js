@@ -58,7 +58,7 @@ const calculateLine = async (info, id) => {
   const { time, teamInfo, handicap } = info
   const saveData = { time, teamInfo, handicap: `大小球盘口: ${handicap}` }
   matchedData[id] = saveData
-  // await sendEmail(saveData)
+  await sendEmail(saveData)
 }
 
 const filterSaveData = (datas) => {

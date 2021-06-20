@@ -8,60 +8,60 @@ const url = 'http://m.win007.com/';
 let matchedData = {}
 
 // 抓取数据
-let detailSpider = async (page, id) => {
-  if (await page.$('#OuTb')) {
+const detailSpider = async (page, id) => {
+  if (await page.$("#OuTb")) {
     const target = await page.evaluate(() => {
-      let nodes = document.querySelectorAll('#OuTb td')
-      let beginTime = document.querySelectorAll('.league')[0].innerHTML
-      let homeName = document.querySelectorAll('#homeName > marquee').length ? document.querySelectorAll('#homeName > marquee').innerText : document.querySelectorAll('#homeName > span')[0].innerText
-      let guestName = document.querySelectorAll('#guestName > marquee').length ? document.querySelectorAll('#guestName > marquee').innerText : document.querySelectorAll('#guestName .name')[0].innerText
-      let analysisNodes = document.querySelectorAll('.huibg')
-      const timeText = `${new Date().getFullYear()}-${beginTime.replace(/&nbsp;/ig, ',').split(',')[1]}`
-      let info = {}
-      for (let i in nodes) {
-        if (nodes[i].innerHTML === '中') {
-          info = {
-            score: nodes[i].nextSibling.textContent,
-            daContent: nodes[i].parentNode.lastChild.childNodes[1].textContent,
-            beginTime: timeText,
-            homeName: homeName,
-            guestName: guestName
-          }
-        }
+      const dateNode = document.querySelectorAll(".league")[0].innerHTML
+      const beginTime = document.querySelectorAll(".league")[0].innerText
+      const homeName = document.getElementById("homeName").querySelector("span").innerText
+      const guestName = document.getElementById("guestName").querySelector("span").innerText
+			const homeScore = document.getElementById("homeScore") ? document.getElementById("homeScore").innerText : "";
+			const guestScore = document.getElementById("guestScore") ? document.getElementById("guestScore").innerText : "";
+      // 获取大小球盘口
+      const tdList = document.querySelectorAll("#OuTb td");
+      const targetTd = Array.from(tdList).find((item) => {
+        return item.innerText === "未";
+      });
+      if (!targetTd) {
+        return
       }
-      for (let key in analysisNodes) {
-        if (analysisNodes[key].innerText === '射门') {
-          info.shot = `${analysisNodes[key].previousSibling.previousSibling.textContent}-射门-${analysisNodes[key].nextSibling.nextSibling.textContent}`
-        }
-        if (analysisNodes[key].innerText === '射正') {
-          info.shotPositive = `${analysisNodes[key].previousSibling.previousSibling.textContent}-射正-${analysisNodes[key].nextSibling.nextSibling.textContent}`
-        }
+      const targetNode = targetTd.parentNode.lastChild;
+      const targetContent = targetNode.querySelector(".realOdds.red").innerText;
+      const needCalculate = targetContent.split('/').length === 2
+      let handicap = targetContent
+      if (needCalculate) {
+        const [left, right] = targetContent.split('/')
+        handicap = (Number(left) + Number(right)) / 2
       }
-      return info
-    })
-    if (target.score) {
-      await calculateLine(target, id)
+      return {
+				time: `时间：${beginTime}`,
+				teamInfo: `主客队：${homeName}(分数：${homeScore}) : ${guestName}(分数：${guestScore})`,
+				handicap,
+        clearTime: dateNode.split("&nbsp;")[1]
+			}
+    });
+    if (target && target.time) {
+      const midTime = dayjs(`${dayjs().year()}-${target.clearTime}:00`).unix()
+      filterSaveData(target)
+      if (dayjs().add(65, 'minute').unix() > midTime && Number(target.handicap) <= 3) {
+        await calculateLine(target, id);
+      }
     }
-    await page.close()
-    await page.waitFor(500)
+    await page.close();
+    await page.waitFor(500);
   } else {
-    await page.close()
+    await page.close();
   }
 }
 
-let calculateLine = async (info, id) => {
-  let { score, daContent, beginTime, homeName, guestName, shot, shotPositive } = info
-  let totalScore = parseInt(score.split('-')[0]) + parseInt(info.score.split('-')[1])
-  let line = daContent.split('/').length === 2 ? 1.5 : 2
-  let midTime = dayjs(beginTime).add('60', 'minute').unix()
-  if (parseFloat(daContent.split('/')[0]) - totalScore >= line && midTime >= dayjs().unix()) {
-    let saveData = shot ? { id: id, homeName: homeName, guestName: guestName, score: score, daContent: daContent, shot: shot, shotPositive: shotPositive } : { id: id, homeName: homeName, guestName: guestName, score: score, daContent: daContent }
-    matchedData[id] = saveData
-    await sendEmail(saveData)
-  }
+const calculateLine = async (info, id) => {
+  const { time, teamInfo, handicap } = info
+  const saveData = { time, teamInfo, handicap: `大小球盘口: ${handicap}` }
+  matchedData[id] = saveData
+  // await sendEmail(saveData)
 }
 
-let filterSaveData = (datas) => {
+const filterSaveData = (datas) => {
   let fileName = `${dayjs().year()}-${dayjs().month() + 1}-${dayjs().date()}.json`
   if (fs.existsSync(`/data/${fileName}.json`)) {
     // 对象属性访问最快
@@ -69,17 +69,14 @@ let filterSaveData = (datas) => {
       let filterData = games
       for (let key in datas) {
         if (games[key]) {
-          if (datas[key]['score'] !== filterData[key]['score']) {
-            filterData[key]['score'] = datas[key]['score']
+          if (datas[key]['time'] !== filterData[key]['time']) {
+            filterData[key]['time'] = datas[key]['time']
           }
-          if (datas[key]['daContent'] !== filterData[key]['daContent']) {
-            filterData[key]['daContent'] = datas[key]['daContent']
+          if (datas[key]['teamInfo'] !== filterData[key]['teamInfo']) {
+            filterData[key]['teamInfo'] = datas[key]['teamInfo']
           }
-          if (datas[key]['shot'] !== filterData[key]['shot']) {
-            filterData[key]['shot'] = datas[key]['shot']
-          }
-          if (datas[key]['shotPositive'] !== filterData[key]['shotPositive']) {
-            filterData[key]['shotPositive'] = datas[key]['shotPositive']
+          if (datas[key]['handicap'] !== filterData[key]['handicap']) {
+            filterData[key]['handicap'] = datas[key]['handicap']
           }
         }
       }
@@ -94,7 +91,8 @@ async function getData () {
     try {
       const getCookiePage = await browser.newPage()
       await getCookiePage.goto(url, {
-        waitUntil: 'networkidle0'
+        waitUntil: 'networkidle0',
+        timeout: 0
       });
       await getCookiePage.click('.more2 > div:last-child')
       await getCookiePage.click('#ul_filter li:nth-child(2)')
@@ -104,6 +102,7 @@ async function getData () {
       const filterType = cookies.filter(item => item.name === 'filterType')[0].value
       await getCookiePage.close()
       const page = await browser.newPage()
+      await page.setDefaultNavigationTimeout(0);
       await page.setCookie({
         "domain": "m.win007.com",
         "expirationDate": '1574130600',
@@ -115,7 +114,8 @@ async function getData () {
         "id": '3'
       })
       await page.goto(url, {
-        waitUntil: 'networkidle0'
+        waitUntil: 'networkidle0',
+        timeout: 0
       });
       await page.waitForSelector('.MList .match')
       const lists = await page.evaluate(() => {
@@ -123,9 +123,11 @@ async function getData () {
         let hrefArr = []
         for (let i = 0; i < itemList.length; i++) {
           let id = itemList[i].id.split('_')[1]
+          const time = itemList[i].querySelector('.time').innerText
           hrefArr.push({
             id: id,
-            href: `http://m.win007.com/Analy/ShiJian/${id}.htm`
+            href: `http://m.win007.com/Analy/ShiJian/${id}.htm`,
+            time
           })
         }
         return hrefArr
@@ -134,11 +136,12 @@ async function getData () {
       for (let i = 0; i < lists.length; i++) {
         let page = await browser.newPage()
         let id = lists[i].id
+        console.log(lists[i].href)
         await page.goto(lists[i].href, {
           waitUntil: 'networkidle0'
         })
         const oddData = await page.$('#ouOdds')
-        oddData ? await detailSpider(page, id) : await page.close()
+        oddData ? await detailSpider(page, id, lists[i].time) : await page.close()
       }
       // 保存符合条件的数据
       if (Object.keys(matchedData).length) {

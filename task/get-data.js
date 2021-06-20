@@ -45,7 +45,7 @@ const detailSpider = async (page, id) => {
     });
     if (target && target.time) {
       const midTime = dayjs(`${dayjs().year()}-${target.clearTime}:00`).unix()
-      filterSaveData(target)
+      // filterSaveData(target)
       const timeRule = dayjs().add(65, 'minute').unix() > midTime && dayjs().unix() < midTime
       const handicapRule = Number(target.handicap) <= 3
       const scoreRule = (Number(target.homeScore) + Number(target.guestScore)) === 3
@@ -150,9 +150,9 @@ async function getData () {
         oddData ? await detailSpider(page, id, lists[i].time) : await page.close()
       }
       // 保存符合条件的数据
-      if (Object.keys(matchedData).length) {
-        filterSaveData(matchedData)
-      }
+      // if (Object.keys(matchedData).length) {
+      //   filterSaveData(matchedData)
+      // }
       await browser.close()
     } catch (e) {
       console.log(e)

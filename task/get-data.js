@@ -36,14 +36,20 @@ const detailSpider = async (page, id) => {
       return {
 				time: `时间：${beginTime}`,
 				teamInfo: `主客队：${homeName}(分数：${homeScore}) : ${guestName}(分数：${guestScore})`,
-				handicap,
-        clearTime: dateNode.split("&nbsp;")[1]
+				homeScore,
+        guestScore,
+        handicap,
+        clearTime: dateNode.split("&nbsp;")[1],
+        realHandicap: targetContent // 没转换的盘口
 			}
     });
     if (target && target.time) {
       const midTime = dayjs(`${dayjs().year()}-${target.clearTime}:00`).unix()
-      // filterSaveData(target)
-      if (dayjs().add(65, 'minute').unix() > midTime && Number(target.handicap) <= 3) {
+      filterSaveData(target)
+      const timeRule = dayjs().add(65, 'minute').unix() > midTime && dayjs().unix() < midTime
+      const handicapRule = Number(target.handicap) <= 3
+      const scoreRule = (Number(target.homeScore) + Number(target.guestScore)) === 3
+      if (timeRule && handicapRule && scoreRule) {
         await calculateLine(target, id);
       }
     }
@@ -55,10 +61,10 @@ const detailSpider = async (page, id) => {
 }
 
 const calculateLine = async (info, id) => {
-  const { time, teamInfo, handicap } = info
-  const saveData = { time, teamInfo, handicap: `大小球盘口: ${handicap}` }
-  matchedData[id] = saveData
-  await sendEmail(saveData)
+  const { time, teamInfo, handicap, realHandicap } = info
+  const dataDetail = { time, teamInfo, handicap: `大小球盘口: ${handicap}`, realHandicap }
+  matchedData[id] = dataDetail
+  await sendEmail(dataDetail)
 }
 
 const filterSaveData = (datas) => {
@@ -144,9 +150,9 @@ async function getData () {
         oddData ? await detailSpider(page, id, lists[i].time) : await page.close()
       }
       // 保存符合条件的数据
-      // if (Object.keys(matchedData).length) {
-      //   filterSaveData(matchedData)
-      // }
+      if (Object.keys(matchedData).length) {
+        filterSaveData(matchedData)
+      }
       await browser.close()
     } catch (e) {
       console.log(e)

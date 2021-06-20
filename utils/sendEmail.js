@@ -23,7 +23,7 @@ const emailConfig = {
 const transporter = nodemailer.createTransport(emailConfig);
 
 async function sendEmail(data) {
-  let content = data;
+  let content = JSON.stringify(data);
   let mail = {
     // 发件人
     from: "来自cloud <327107942@qq.com>",

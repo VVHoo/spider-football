@@ -44,9 +44,10 @@ const detailSpider = async (page, id) => {
 			}
     });
     if (target && target.time) {
-      const midTime = dayjs(`${dayjs().year()}-${target.clearTime}:00`).unix()
+      const startTime = dayjs(`${dayjs().year()}-${target.clearTime}:00`).unix()
+      const midTime = dayjs(`${dayjs().year()}-${target.clearTime}:00`).add(65, 'minute').unix()
       // filterSaveData(target)
-      const timeRule = dayjs().add(65, 'minute').unix() > midTime && dayjs().unix() < midTime
+      const timeRule = dayjs().unix() > startTime && dayjs().unix() < midTime
       const handicapRule = Number(target.handicap) <= 3
       const scoreRule = (Number(target.homeScore) + Number(target.guestScore)) === 3
       if (timeRule && handicapRule && scoreRule) {

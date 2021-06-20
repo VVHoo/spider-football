@@ -1,8 +1,9 @@
 const schedule = require('node-schedule')
 const getData = require('./get-data')
-const config = require('../config')
 async function startTask () {
-  schedule.scheduleJob(config.TRIGGER_TIME, async () => {
+  const rule = new schedule.RecurrenceRule();
+  rule.second = [0, 20, 40]; // 每隔 10 秒执行一次
+  schedule.scheduleJob(rule, async () => {
     getData()
   })
 }

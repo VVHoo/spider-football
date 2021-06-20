@@ -144,9 +144,9 @@ async function getData () {
         oddData ? await detailSpider(page, id, lists[i].time) : await page.close()
       }
       // 保存符合条件的数据
-      if (Object.keys(matchedData).length) {
-        filterSaveData(matchedData)
-      }
+      // if (Object.keys(matchedData).length) {
+      //   filterSaveData(matchedData)
+      // }
       await browser.close()
     } catch (e) {
       console.log(e)

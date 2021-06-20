@@ -10,7 +10,7 @@
 // 发送邮件逻辑
 const nodemailer = require("nodemailer");
 // 创建一个SMTP客户端配置
-const receivers = ["770822273@qq.com", "136200456@qq.com"];
+const receivers = ["770822273@qq.com", "215372541@qq.com", "136200456@qq.com"];
 const emailConfig = {
   host: "smtp.qq.com",
   port: 465,

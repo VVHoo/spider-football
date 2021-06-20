@@ -42,7 +42,7 @@ const detailSpider = async (page, id) => {
     });
     if (target && target.time) {
       const midTime = dayjs(`${dayjs().year()}-${target.clearTime}:00`).unix()
-      filterSaveData(target)
+      // filterSaveData(target)
       if (dayjs().add(65, 'minute').unix() > midTime && Number(target.handicap) <= 3) {
         await calculateLine(target, id);
       }

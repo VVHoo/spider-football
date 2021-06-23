@@ -143,7 +143,6 @@ async function getData () {
       for (let i = 0; i < lists.length; i++) {
         let page = await browser.newPage()
         let id = lists[i].id
-        console.log(lists[i].href)
         await page.goto(lists[i].href, {
           waitUntil: 'networkidle0'
         })
